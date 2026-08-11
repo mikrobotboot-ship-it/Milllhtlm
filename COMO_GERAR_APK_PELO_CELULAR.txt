@@ -1,0 +1,17 @@
+MIKROBOT V55 — GERAR APK PELO CELULAR
+
+1. Crie um repositório no GitHub.
+2. Extraia este ZIP.
+3. Envie TODOS os arquivos e pastas para o repositório.
+4. Confirme que existe:
+   .github/workflows/build-apk.yml
+5. No GitHub, abra Actions.
+6. Selecione "Build MikroBot APK".
+7. Toque em "Run workflow".
+8. Aguarde terminar.
+9. Abra a execução concluída.
+10. Baixe o artefato "MikroBot-V55-APK".
+11. Extraia o ZIP do artefato.
+12. Instale o arquivo .apk no Moto G86.
+
+O APK é compilado na nuvem; o celular não precisa compilar Android SDK/NDK.
