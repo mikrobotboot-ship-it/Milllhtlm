@@ -1,0 +1,7 @@
+<service
+    android:name="br.mikrobot.mikrobotprox.ServiceMikrobotcore"
+    android:foregroundServiceType="specialUse">
+    <property
+        android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+        android:value="Mantém o núcleo local do MikroBot disponível para diagnóstico e comunicação com a interface do aplicativo." />
+</service>

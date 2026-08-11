@@ -1,0 +1,14 @@
+{
+  "base": "MikroBot_Pro_X_REBUILD_40K_LIMPO.html",
+  "version": "40.1.0",
+  "html_bytes": 12746,
+  "ids": 28,
+  "duplicate_ids": {},
+  "js_syntax_ok": true,
+  "js_error": "",
+  "python_main_syntax_ok": true,
+  "python_service_syntax_ok": true,
+  "foreground_service": "foreground+sticky+specialUse",
+  "architecture": "arm64-v8a",
+  "buildozer": "1.6.0"
+}

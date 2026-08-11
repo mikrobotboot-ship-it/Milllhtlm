@@ -1,0 +1,19 @@
+MIKROBOT REBUILD 40K — VERSÃO REVISADA 40.1
+
+Base: MikroBot_Pro_X_REBUILD_40K_LIMPO.html.
+
+Correções:
+- Python Core é iniciado pelo aplicativo.
+- Serviço foreground + sticky + auto-restart quando suportado.
+- foregroundServiceType=specialUse para Android 14+.
+- Servidor local tolera BrokenPipe/ConnectionReset.
+- WebView abre após o núcleo.
+- Interface verifica /api/health a cada 5 segundos.
+- Workflow valida Python e arquivos antes do build.
+- Buildozer 1.6.0 fixado.
+- Cython fixado.
+- APK direcionado a arm64-v8a.
+- Arquivos temporários excluídos.
+
+Fluxo:
+GitHub -> Actions -> Build MikroBot APK — revisado -> Run workflow -> Success -> Artifacts.

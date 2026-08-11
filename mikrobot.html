@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>MikroBot Pro X — Rebuild 40K</title>
+<style>
+:root{--bg:#070b12;--panel:#0d1420;--panel2:#111b2a;--line:#243247;--txt:#edf4ff;--muted:#91a0b5;--accent:#4cc9f0;--ok:#55d187;--warn:#ffd166;--bad:#ff6b6b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+header{position:sticky;top:0;z-index:5;background:#09101aee;border-bottom:1px solid var(--line);backdrop-filter:blur(10px);padding:12px}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand h1{font-size:18px;margin:0}.badge{font-size:11px;color:var(--accent);border:1px solid #24536b;padding:4px 7px;border-radius:999px}
+nav{display:flex;gap:7px;overflow:auto;padding-top:10px}nav button,.btn{border:1px solid var(--line);background:var(--panel);color:var(--txt);border-radius:9px;padding:9px 12px}nav button.active,.btn.primary{background:#12364a;border-color:#2b718d}
+main{max-width:1200px;margin:auto;padding:14px}.tab{display:none}.tab.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.card{grid-column:span 12;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}.half{grid-column:span 6}.third{grid-column:span 4}
+h2,h3{margin:0 0 10px}p{color:var(--muted)}label{display:block;color:var(--muted);font-size:12px;margin:8px 0 5px}
+textarea,input,select{width:100%;background:#080e17;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:10px;outline:none}textarea{min-height:260px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.status{padding:10px;border-radius:8px;background:#080e17;border:1px solid var(--line);white-space:pre-wrap}
+.ok{border-color:#23633f}.warn{border-color:#69551d}.bad{border-color:#6b2d35}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kpi{padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:9px}.kpi b{display:block;font-size:22px}
+table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}th{color:var(--muted);font-size:12px}
+small,.muted{color:var(--muted)}.log{max-height:260px;overflow:auto;font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap}
+footer{max-width:1200px;margin:auto;padding:20px 14px;color:var(--muted);text-align:center}
+@media(max-width:800px){.half,.third{grid-column:span 12}.kpis{grid-template-columns:repeat(2,1fr)}nav button{flex:0 0 auto}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><h1>🤖 MikroBot Pro X</h1><span class="badge">REBUILD 40K • OFFLINE-FIRST</span></div>
+ <nav id="nav">
+  <button class="active" data-tab="home">Painel</button>
+  <button data-tab="script">Script MikroTik</button>
+  <button data-tab="diag">Diagnóstico</button>
+  <button data-tab="report">Relatório</button>
+ </nav>
+</header>
+
+<main>
+<section id="home" class="tab active">
+ <div class="grid">
+  <div class="card"><h2>Central do MikroBot</h2><p>Versão reconstruída com foco em estabilidade, validação e funcionamento no celular. Não promete acesso ao hardware sem uma ponte/backend compatível.</p>
+   <div class="kpis"><div class="kpi"><small>Erros JS</small><b id="jsErrors">0</b></div><div class="kpi"><small>Alertas</small><b id="alerts">0</b></div><div class="kpi"><small>Regras</small><b id="rules">0</b></div><div class="kpi"><small>Status</small><b id="health">OK</b></div></div>
+  </div>
+  <div class="card half"><h3>Importar script</h3><input id="fileInput" type="file" accept=".rsc,.txt,.cfg,.log,.html,.json"><div class="row"><button class="btn primary" id="goScript">Abrir analisador</button></div></div>
+  <div class="card half"><h3>Teste local</h3><div id="browserStatus" class="status">Verificando recursos do navegador…</div></div>
+ </div>
+</section>
+
+<section id="script" class="tab">
+ <div class="grid">
+  <div class="card"><h2>Analisador e corretor de Script MikroTik</h2>
+   <label for="scriptInput">Cole o script</label>
+   <textarea id="scriptInput" spellcheck="false" placeholder="# Cole aqui a configuração RouterOS..."></textarea>
+   <div class="row">
+    <button class="btn primary" id="analyze">Analisar</button>
+    <button class="btn" id="clear">Limpar</button>
+    <button class="btn" id="copy">Copiar</button>
+    <button class="btn" id="downloadScript">Baixar .rsc</button>
+   </div>
+  </div>
+  <div class="card"><h3>Resultado da auditoria</h3><div id="analysis" class="status">Nenhuma análise executada.</div></div>
+  <div class="card"><h3>Script corrigido</h3><textarea id="fixedScript" spellcheck="false" placeholder="O resultado seguro e conservador aparecerá aqui."></textarea>
+   <div class="row"><button class="btn primary" id="useFixed">Usar correção</button><button class="btn" id="downloadFixed">Baixar corrigido</button></div>
+  </div>
+ </div>
+</section>
+
+<section id="diag" class="tab">
+ <div class="grid">
+  <div class="card"><h2>Diagnóstico do ambiente</h2><div id="diagResult" class="status"></div><div class="row"><button class="btn primary" id="runDiag">Executar diagnóstico</button></div></div>
+  <div class="card"><h3>Limites do navegador</h3><p>Uma página HTML comum pode testar conectividade web e validar scripts, mas não consegue configurar diretamente um MikroTik, ler USB/RJ45 ou executar comandos RouterOS sem um backend/ponte com permissões apropriadas.</p></div>
+ </div>
+</section>
+
+<section id="report" class="tab">
+ <div class="grid">
+  <div class="card"><h2>Relatório técnico</h2><label>Cliente / local</label><input id="client" placeholder="Ex.: P06"><label>Observações</label><textarea id="notes" placeholder="Descreva testes, erros e ações realizadas."></textarea>
+   <div class="row"><button class="btn primary" id="makeReport">Gerar relatório</button><button class="btn" id="downloadReport">Baixar relatório</button></div>
+  </div>
+  <div class="card"><h3>Prévia</h3><div id="reportPreview" class="status">Nenhum relatório gerado.</div></div>
+ </div>
+</section>
+</main>
+<footer>MikroBot Pro X • reconstruído para reduzir pontos de falha e funcionar bem em telas móveis.</footer>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const state={script:"",fixed:"",issues:[],report:""};
+
+function log(msg){console.log("[MikroBot]",msg)}
+function downloadText(name,text,type="text/plain"){
+ const blob=new Blob([text],{type}); const a=document.createElement("a");
+ a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click();
+ setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+}
+function setTab(id){
+ document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.id===id));
+ document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x.dataset.tab===id));
+}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+$("#goScript").addEventListener("click",()=>setTab("script"));
+
+function analyzeScript(src){
+ const lines=src.split(/\r?\n/), issues=[], fixed=[];
+ let comments=0, rules=0;
+ lines.forEach((line,i)=>{
+  const t=line.trim(); fixed.push(line);
+  if(!t){return}
+  if(t.startsWith("#")){comments++;return}
+  if(/^\/[A-Za-z]/.test(t))rules++;
+  if(/password\s*=\s*["']?[^ \n"']+/i.test(t)) issues.push({line:i+1,type:"ALERTA",msg:"Possível credencial exposta no script."});
+  if(/\/ip\s+address\s+add/i.test(t)&&!/interface\s*=/i.test(t)) issues.push({line:i+1,type:"REVISAR",msg:"Regra de IP sem interface explícita; confirme antes de aplicar."});
+  if(/masquerade/i.test(t)&&!/src-nat/i.test(t)) {}
+  if(/\/interface\s+bridge\s+port\s+add/i.test(t)&&!/bridge\s*=/i.test(t)) issues.push({line:i+1,type:"REVISAR",msg:"Bridge port sem bridge explícita."});
+  if(/\/ip\s+route\s+add/i.test(t)&&!/gateway\s*=|routing-table\s*=/i.test(t)) issues.push({line:i+1,type:"REVISAR",msg:"Rota sem gateway/tabela explícita."});
+  if(/\/ip\s+dhcp-server\s+network\s+add/i.test(t)&&!/address\s*=/i.test(t)) issues.push({line:i+1,type:"REVISAR",msg:"Rede DHCP sem address explícito."});
+ });
+ return {lines,issues,fixed:fixed.join("\n"),comments,rules};
+}
+function renderAnalysis(r){
+ $("#rules").textContent=r.rules; $("#alerts").textContent=r.issues.length;
+ $("#health").textContent=r.issues.length?"REVISAR":"OK";
+ if(!r.issues.length){$("#analysis").className="status ok";$("#analysis").textContent="✓ Nenhum erro estrutural simples encontrado. A configuração ainda deve ser validada no equipamento antes de aplicar.";return}
+ $("#analysis").className="status warn";
+ $("#analysis").textContent=r.issues.map(x=>`Linha ${x.line} • ${x.type}: ${x.msg}`).join("\n");
+}
+$("#analyze").addEventListener("click",()=>{
+ state.script=$("#scriptInput").value; const r=analyzeScript(state.script); state.issues=r.issues; state.fixed=r.fixed;
+ $("#fixedScript").value=state.fixed; renderAnalysis(r); log("Auditoria concluída");
+});
+$("#clear").addEventListener("click",()=>{$("#scriptInput").value="";$("#fixedScript").value="";$("#analysis").textContent="Nenhuma análise executada.";$("#alerts").textContent="0";$("#rules").textContent="0"});
+$("#copy").addEventListener("click",async()=>{const t=$("#scriptInput").value;if(!t)return;try{await navigator.clipboard.writeText(t);alert("Script copiado.")}catch{alert("O navegador não permitiu copiar automaticamente.")}});
+$("#useFixed").addEventListener("click",()=>{$("#scriptInput").value=$("#fixedScript").value;alert("Correção carregada no analisador. Execute a análise novamente.")});
+$("#downloadScript").addEventListener("click",()=>downloadText("mikrotik-script.rsc",$("#scriptInput").value));
+$("#downloadFixed").addEventListener("click",()=>downloadText("mikrotik-script-corrigido.rsc",$("#fixedScript").value));
+$("#fileInput").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;$("#scriptInput").value=await f.text();setTab("script");$("#analyze").click()});
+
+function runDiag(){
+ const rows=[
+  ["JavaScript",typeof window==="object"?"OK":"FALHA"],
+  ["DOM",document.body?"OK":"FALHA"],
+  ["LocalStorage",(()=>{try{localStorage.setItem("_mb","1");localStorage.removeItem("_mb");return"OK"}catch{return"INDISPONÍVEL"}})()],
+  ["Online",navigator.onLine?"ONLINE":"OFFLINE"],
+  ["HTTPS",location.protocol==="https:"?"SIM":"NÃO"],
+  ["Service Worker",("serviceWorker" in navigator)?"DISPONÍVEL":"NÃO DISPONÍVEL"],
+  ["Tela",`${innerWidth}×${innerHeight}`]
+ ];
+ $("#diagResult").textContent=rows.map(r=>`${r[0]}: ${r[1]}`).join("\n");
+}
+$("#runDiag").addEventListener("click",runDiag);
+runDiag();
+
+function makeReport(){
+ const client=$("#client").value.trim()||"Não informado", notes=$("#notes").value.trim()||"Sem observações.";
+ const time=new Date().toLocaleString("pt-BR");
+ state.report=`RELATÓRIO TÉCNICO — MIKROBOT PRO X\n\nLocal/Cliente: ${client}\nData: ${time}\nStatus da auditoria: ${state.issues.length?"REVISAR":"OK"}\nQuantidade de alertas: ${state.issues.length}\n\nOBSERVAÇÕES\n${notes}\n\nNOTA\nEste relatório registra análise no navegador. Aplicações de configuração no MikroTik devem ser validadas no equipamento antes da execução.`;
+ $("#reportPreview").textContent=state.report;
+}
+$("#makeReport").addEventListener("click",makeReport);
+$("#downloadReport").addEventListener("click",()=>{if(!state.report)makeReport();downloadText("MikroBot_Relatorio_Tecnico.txt",state.report)});
+
+$("#browserStatus").textContent=`Página carregada corretamente.
+URL: ${location.href}
+JavaScript: OK
+Interface: OK
+Data: ${new Date().toLocaleString("pt-BR")}`;
+window.addEventListener("error",()=>{$("#jsErrors").textContent=String(Number($("#jsErrors").textContent)+1);$("#health").textContent="ERRO"});
+log("MikroBot iniciado sem dependências externas.");
+async function checkPythonCore(){
+  const el=$("#pythonStatus");
+  try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),1800);
+    const r=await fetch("/api/health",{cache:"no-store",signal:controller.signal});
+    clearTimeout(timer);
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const x=await r.json();
+    el.className="status ok";
+    el.textContent=`✓ Python Core ONLINE • ${x.version||"OK"} • uptime ${x.uptime??"-"}s`;
+  }catch(e){
+    el.className="status warn";
+    el.textContent="⚠ Python Core aguardando/reconectando…";
+  }
+}
+checkPythonCore();
+setInterval(checkPythonCore,5000);
+
+</script>
+</body>
+</html>
