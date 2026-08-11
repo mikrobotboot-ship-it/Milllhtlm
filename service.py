@@ -1,66 +1,96 @@
-import base64
-import json
-import platform
-import time
+#!/usr/bin/env python3
+import json, os, platform, socket, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlparse
+from pathlib import Path
+import urllib.request
 
-PORT = 8765
-START = time.monotonic()
-HTML_B64 = """PCFkb2N0eXBlIGh0bWw+CjxodG1sIGxhbmc9InB0LUJSIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9InV0Zi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCxpbml0aWFsLXNjYWxlPTEsdmlld3BvcnQtZml0PWNvdmVyIj4KPG1ldGEgbmFtZT0idGhlbWUtY29sb3IiIGNvbnRlbnQ9IiMwYjEyMjAiPgo8dGl0bGU+TWlrcm9Cb3QgUHJvIFgg4oCUIFJlYnVpbGQgNDBLPC90aXRsZT4KPHN0eWxlPgo6cm9vdHstLWJnOiMwNzBiMTI7LS1wYW5lbDojMGQxNDIwOy0tcGFuZWwyOiMxMTFiMmE7LS1saW5lOiMyNDMyNDc7LS10eHQ6I2VkZjRmZjstLW11dGVkOiM5MWEwYjU7LS1hY2NlbnQ6IzRjYzlmMDstLW9rOiM1NWQxODc7LS13YXJuOiNmZmQxNjY7LS1iYWQ6I2ZmNmI2Yn0KKntib3gtc2l6aW5nOmJvcmRlci1ib3h9Ym9keXttYXJnaW46MDtiYWNrZ3JvdW5kOnZhcigtLWJnKTtjb2xvcjp2YXIoLS10eHQpO2ZvbnQ6MTVweCBzeXN0ZW0tdWksLWFwcGxlLXN5c3RlbSxTZWdvZSBVSSxSb2JvdG8sQXJpYWwsc2Fucy1zZXJpZn0KYnV0dG9uLGlucHV0LHRleHRhcmVhLHNlbGVjdHtmb250OmluaGVyaXR9YnV0dG9ue2N1cnNvcjpwb2ludGVyfQpoZWFkZXJ7cG9zaXRpb246c3RpY2t5O3RvcDowO3otaW5kZXg6NTtiYWNrZ3JvdW5kOiMwOTEwMWFlZTtib3JkZXItYm90dG9tOjFweCBzb2xpZCB2YXIoLS1saW5lKTtiYWNrZHJvcC1maWx0ZXI6Ymx1cigxMHB4KTtwYWRkaW5nOjEycHh9Ci5icmFuZHtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO2dhcDoxMHB4fS5icmFuZCBoMXtmb250LXNpemU6MThweDttYXJnaW46MH0uYmFkZ2V7Zm9udC1zaXplOjExcHg7Y29sb3I6dmFyKC0tYWNjZW50KTtib3JkZXI6MXB4IHNvbGlkICMyNDUzNmI7cGFkZGluZzo0cHggN3B4O2JvcmRlci1yYWRpdXM6OTk5cHh9Cm5hdntkaXNwbGF5OmZsZXg7Z2FwOjdweDtvdmVyZmxvdzphdXRvO3BhZGRpbmctdG9wOjEwcHh9bmF2IGJ1dHRvbiwuYnRue2JvcmRlcjoxcHggc29saWQgdmFyKC0tbGluZSk7YmFja2dyb3VuZDp2YXIoLS1wYW5lbCk7Y29sb3I6dmFyKC0tdHh0KTtib3JkZXItcmFkaXVzOjlweDtwYWRkaW5nOjlweCAxMnB4fW5hdiBidXR0b24uYWN0aXZlLC5idG4ucHJpbWFyeXtiYWNrZ3JvdW5kOiMxMjM2NGE7Ym9yZGVyLWNvbG9yOiMyYjcxOGR9Cm1haW57bWF4LXdpZHRoOjEyMDBweDttYXJnaW46YXV0bztwYWRkaW5nOjE0cHh9LnRhYntkaXNwbGF5Om5vbmV9LnRhYi5hY3RpdmV7ZGlzcGxheTpibG9ja30KLmdyaWR7ZGlzcGxheTpncmlkO2dyaWQtdGVtcGxhdGUtY29sdW1uczpyZXBlYXQoMTIsMWZyKTtnYXA6MTJweH0uY2FyZHtncmlkLWNvbHVtbjpzcGFuIDEyO2JhY2tncm91bmQ6dmFyKC0tcGFuZWwpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tbGluZSk7Ym9yZGVyLXJhZGl1czoxMnB4O3BhZGRpbmc6MTRweH0uaGFsZntncmlkLWNvbHVtbjpzcGFuIDZ9LnRoaXJke2dyaWQtY29sdW1uOnNwYW4gNH0KaDIsaDN7bWFyZ2luOjAgMCAxMHB4fXB7Y29sb3I6dmFyKC0tbXV0ZWQpfWxhYmVse2Rpc3BsYXk6YmxvY2s7Y29sb3I6dmFyKC0tbXV0ZWQpO2ZvbnQtc2l6ZToxMnB4O21hcmdpbjo4cHggMCA1cHh9CnRleHRhcmVhLGlucHV0LHNlbGVjdHt3aWR0aDoxMDAlO2JhY2tncm91bmQ6IzA4MGUxNztjb2xvcjp2YXIoLS10eHQpO2JvcmRlcjoxcHggc29saWQgdmFyKC0tbGluZSk7Ym9yZGVyLXJhZGl1czo4cHg7cGFkZGluZzoxMHB4O291dGxpbmU6bm9uZX10ZXh0YXJlYXttaW4taGVpZ2h0OjI2MHB4O3Jlc2l6ZTp2ZXJ0aWNhbH0KLnJvd3tkaXNwbGF5OmZsZXg7ZmxleC13cmFwOndyYXA7Z2FwOjhweDttYXJnaW4tdG9wOjEwcHh9LnN0YXR1c3twYWRkaW5nOjEwcHg7Ym9yZGVyLXJhZGl1czo4cHg7YmFja2dyb3VuZDojMDgwZTE3O2JvcmRlcjoxcHggc29saWQgdmFyKC0tbGluZSk7d2hpdGUtc3BhY2U6cHJlLXdyYXB9Ci5va3tib3JkZXItY29sb3I6IzIzNjMzZn0ud2Fybntib3JkZXItY29sb3I6IzY5NTUxZH0uYmFke2JvcmRlci1jb2xvcjojNmIyZDM1fQoua3Bpc3tkaXNwbGF5OmdyaWQ7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOnJlcGVhdCg0LDFmcik7Z2FwOjhweH0ua3Bpe3BhZGRpbmc6MTJweDtiYWNrZ3JvdW5kOnZhcigtLXBhbmVsMik7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtib3JkZXItcmFkaXVzOjlweH0ua3BpIGJ7ZGlzcGxheTpibG9jaztmb250LXNpemU6MjJweH0KdGFibGV7d2lkdGg6MTAwJTtib3JkZXItY29sbGFwc2U6Y29sbGFwc2V9dGgsdGR7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgdmFyKC0tbGluZSk7cGFkZGluZzo4cHg7dGV4dC1hbGlnbjpsZWZ0O3ZlcnRpY2FsLWFsaWduOnRvcH10aHtjb2xvcjp2YXIoLS1tdXRlZCk7Zm9udC1zaXplOjEycHh9CnNtYWxsLC5tdXRlZHtjb2xvcjp2YXIoLS1tdXRlZCl9LmxvZ3ttYXgtaGVpZ2h0OjI2MHB4O292ZXJmbG93OmF1dG87Zm9udC1mYW1pbHk6dWktbW9ub3NwYWNlLG1vbm9zcGFjZTtmb250LXNpemU6MTJweDt3aGl0ZS1zcGFjZTpwcmUtd3JhcH0KZm9vdGVye21heC13aWR0aDoxMjAwcHg7bWFyZ2luOmF1dG87cGFkZGluZzoyMHB4IDE0cHg7Y29sb3I6dmFyKC0tbXV0ZWQpO3RleHQtYWxpZ246Y2VudGVyfQpAbWVkaWEobWF4LXdpZHRoOjgwMHB4KXsuaGFsZiwudGhpcmR7Z3JpZC1jb2x1bW46c3BhbiAxMn0ua3Bpc3tncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDIsMWZyKX1uYXYgYnV0dG9ue2ZsZXg6MCAwIGF1dG99fQo8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5Pgo8aGVhZGVyPgogPGRpdiBjbGFzcz0iYnJhbmQiPjxoMT7wn6SWIE1pa3JvQm90IFBybyBYPC9oMT48c3BhbiBjbGFzcz0iYmFkZ2UiPlJFQlVJTEQgNDBLIOKAoiBPRkZMSU5FLUZJUlNUPC9zcGFuPjwvZGl2PgogPG5hdiBpZD0ibmF2Ij4KICA8YnV0dG9uIGNsYXNzPSJhY3RpdmUiIGRhdGEtdGFiPSJob21lIj5QYWluZWw8L2J1dHRvbj4KICA8YnV0dG9uIGRhdGEtdGFiPSJzY3JpcHQiPlNjcmlwdCBNaWtyb1RpazwvYnV0dG9uPgogIDxidXR0b24gZGF0YS10YWI9ImRpYWciPkRpYWduw7NzdGljbzwvYnV0dG9uPgogIDxidXR0b24gZGF0YS10YWI9InJlcG9ydCI+UmVsYXTDs3JpbzwvYnV0dG9uPgogPC9uYXY+CjwvaGVhZGVyPgoKPG1haW4+CjxzZWN0aW9uIGlkPSJob21lIiBjbGFzcz0idGFiIGFjdGl2ZSI+CiA8ZGl2IGNsYXNzPSJncmlkIj4KICA8ZGl2IGNsYXNzPSJjYXJkIj48aDI+Q2VudHJhbCBkbyBNaWtyb0JvdDwvaDI+PHA+VmVyc8OjbyByZWNvbnN0cnXDrWRhIGNvbSBmb2NvIGVtIGVzdGFiaWxpZGFkZSwgdmFsaWRhw6fDo28gZSBmdW5jaW9uYW1lbnRvIG5vIGNlbHVsYXIuIE7Do28gcHJvbWV0ZSBhY2Vzc28gYW8gaGFyZHdhcmUgc2VtIHVtYSBwb250ZS9iYWNrZW5kIGNvbXBhdMOtdmVsLjwvcD4KICAgPGRpdiBjbGFzcz0ia3BpcyI+PGRpdiBjbGFzcz0ia3BpIj48c21hbGw+RXJyb3MgSlM8L3NtYWxsPjxiIGlkPSJqc0Vycm9ycyI+MDwvYj48L2Rpdj48ZGl2IGNsYXNzPSJrcGkiPjxzbWFsbD5BbGVydGFzPC9zbWFsbD48YiBpZD0iYWxlcnRzIj4wPC9iPjwvZGl2PjxkaXYgY2xhc3M9ImtwaSI+PHNtYWxsPlJlZ3Jhczwvc21hbGw+PGIgaWQ9InJ1bGVzIj4wPC9iPjwvZGl2PjxkaXYgY2xhc3M9ImtwaSI+PHNtYWxsPlN0YXR1czwvc21hbGw+PGIgaWQ9ImhlYWx0aCI+T0s8L2I+PC9kaXY+PC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0iY2FyZCBoYWxmIj48aDM+SW1wb3J0YXIgc2NyaXB0PC9oMz48aW5wdXQgaWQ9ImZpbGVJbnB1dCIgdHlwZT0iZmlsZSIgYWNjZXB0PSIucnNjLC50eHQsLmNmZywubG9nLC5odG1sLC5qc29uIj48ZGl2IGNsYXNzPSJyb3ciPjxidXR0b24gY2xhc3M9ImJ0biBwcmltYXJ5IiBpZD0iZ29TY3JpcHQiPkFicmlyIGFuYWxpc2Fkb3I8L2J1dHRvbj48L2Rpdj48L2Rpdj4KICA8ZGl2IGNsYXNzPSJjYXJkIGhhbGYiPjxoMz5UZXN0ZSBsb2NhbDwvaDM+PGRpdiBpZD0iYnJvd3NlclN0YXR1cyIgY2xhc3M9InN0YXR1cyI+VmVyaWZpY2FuZG8gcmVjdXJzb3MgZG8gbmF2ZWdhZG9y4oCmPC9kaXY+PC9kaXY+CiA8L2Rpdj4KPC9zZWN0aW9uPgoKPHNlY3Rpb24gaWQ9InNjcmlwdCIgY2xhc3M9InRhYiI+CiA8ZGl2IGNsYXNzPSJncmlkIj4KICA8ZGl2IGNsYXNzPSJjYXJkIj48aDI+QW5hbGlzYWRvciBlIGNvcnJldG9yIGRlIFNjcmlwdCBNaWtyb1RpazwvaDI+CiAgIDxsYWJlbCBmb3I9InNjcmlwdElucHV0Ij5Db2xlIG8gc2NyaXB0PC9sYWJlbD4KICAgPHRleHRhcmVhIGlkPSJzY3JpcHRJbnB1dCIgc3BlbGxjaGVjaz0iZmFsc2UiIHBsYWNlaG9sZGVyPSIjIENvbGUgYXF1aSBhIGNvbmZpZ3VyYcOnw6NvIFJvdXRlck9TLi4uIj48L3RleHRhcmVhPgogICA8ZGl2IGNsYXNzPSJyb3ciPgogICAgPGJ1dHRvbiBjbGFzcz0iYnRuIHByaW1hcnkiIGlkPSJhbmFseXplIj5BbmFsaXNhcjwvYnV0dG9uPgogICAgPGJ1dHRvbiBjbGFzcz0iYnRuIiBpZD0iY2xlYXIiPkxpbXBhcjwvYnV0dG9uPgogICAgPGJ1dHRvbiBjbGFzcz0iYnRuIiBpZD0iY29weSI+Q29waWFyPC9idXR0b24+CiAgICA8YnV0dG9uIGNsYXNzPSJidG4iIGlkPSJkb3dubG9hZFNjcmlwdCI+QmFpeGFyIC5yc2M8L2J1dHRvbj4KICAgPC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0iY2FyZCI+PGgzPlJlc3VsdGFkbyBkYSBhdWRpdG9yaWE8L2gzPjxkaXYgaWQ9ImFuYWx5c2lzIiBjbGFzcz0ic3RhdHVzIj5OZW5odW1hIGFuw6FsaXNlIGV4ZWN1dGFkYS48L2Rpdj48L2Rpdj4KICA8ZGl2IGNsYXNzPSJjYXJkIj48aDM+U2NyaXB0IGNvcnJpZ2lkbzwvaDM+PHRleHRhcmVhIGlkPSJmaXhlZFNjcmlwdCIgc3BlbGxjaGVjaz0iZmFsc2UiIHBsYWNlaG9sZGVyPSJPIHJlc3VsdGFkbyBzZWd1cm8gZSBjb25zZXJ2YWRvciBhcGFyZWNlcsOhIGFxdWkuIj48L3RleHRhcmVhPgogICA8ZGl2IGNsYXNzPSJyb3ciPjxidXR0b24gY2xhc3M9ImJ0biBwcmltYXJ5IiBpZD0idXNlRml4ZWQiPlVzYXIgY29ycmXDp8OjbzwvYnV0dG9uPjxidXR0b24gY2xhc3M9ImJ0biIgaWQ9ImRvd25sb2FkRml4ZWQiPkJhaXhhciBjb3JyaWdpZG88L2J1dHRvbj48L2Rpdj4KICA8L2Rpdj4KIDwvZGl2Pgo8L3NlY3Rpb24+Cgo8c2VjdGlvbiBpZD0iZGlhZyIgY2xhc3M9InRhYiI+CiA8ZGl2IGNsYXNzPSJncmlkIj4KICA8ZGl2IGNsYXNzPSJjYXJkIj48aDI+RGlhZ27Ds3N0aWNvIGRvIGFtYmllbnRlPC9oMj48ZGl2IGlkPSJkaWFnUmVzdWx0IiBjbGFzcz0ic3RhdHVzIj48L2Rpdj48ZGl2IGNsYXNzPSJyb3ciPjxidXR0b24gY2xhc3M9ImJ0biBwcmltYXJ5IiBpZD0icnVuRGlhZyI+RXhlY3V0YXIgZGlhZ27Ds3N0aWNvPC9idXR0b24+PC9kaXY+PC9kaXY+CiAgPGRpdiBjbGFzcz0iY2FyZCI+PGgzPkxpbWl0ZXMgZG8gbmF2ZWdhZG9yPC9oMz48cD5VbWEgcMOhZ2luYSBIVE1MIGNvbXVtIHBvZGUgdGVzdGFyIGNvbmVjdGl2aWRhZGUgd2ViIGUgdmFsaWRhciBzY3JpcHRzLCBtYXMgbsOjbyBjb25zZWd1ZSBjb25maWd1cmFyIGRpcmV0YW1lbnRlIHVtIE1pa3JvVGlrLCBsZXIgVVNCL1JKNDUgb3UgZXhlY3V0YXIgY29tYW5kb3MgUm91dGVyT1Mgc2VtIHVtIGJhY2tlbmQvcG9udGUgY29tIHBlcm1pc3PDtWVzIGFwcm9wcmlhZGFzLjwvcD48L2Rpdj4KIDwvZGl2Pgo8L3NlY3Rpb24+Cgo8c2VjdGlvbiBpZD0icmVwb3J0IiBjbGFzcz0idGFiIj4KIDxkaXYgY2xhc3M9ImdyaWQiPgogIDxkaXYgY2xhc3M9ImNhcmQiPjxoMj5SZWxhdMOzcmlvIHTDqWNuaWNvPC9oMj48bGFiZWw+Q2xpZW50ZSAvIGxvY2FsPC9sYWJlbD48aW5wdXQgaWQ9ImNsaWVudCIgcGxhY2Vob2xkZXI9IkV4LjogUDA2Ij48bGFiZWw+T2JzZXJ2YcOnw7VlczwvbGFiZWw+PHRleHRhcmVhIGlkPSJub3RlcyIgcGxhY2Vob2xkZXI9IkRlc2NyZXZhIHRlc3RlcywgZXJyb3MgZSBhw6fDtWVzIHJlYWxpemFkYXMuIj48L3RleHRhcmVhPgogICA8ZGl2IGNsYXNzPSJyb3ciPjxidXR0b24gY2xhc3M9ImJ0biBwcmltYXJ5IiBpZD0ibWFrZVJlcG9ydCI+R2VyYXIgcmVsYXTDs3JpbzwvYnV0dG9uPjxidXR0b24gY2xhc3M9ImJ0biIgaWQ9ImRvd25sb2FkUmVwb3J0Ij5CYWl4YXIgcmVsYXTDs3JpbzwvYnV0dG9uPjwvZGl2PgogIDwvZGl2PgogIDxkaXYgY2xhc3M9ImNhcmQiPjxoMz5QcsOpdmlhPC9oMz48ZGl2IGlkPSJyZXBvcnRQcmV2aWV3IiBjbGFzcz0ic3RhdHVzIj5OZW5odW0gcmVsYXTDs3JpbyBnZXJhZG8uPC9kaXY+PC9kaXY+CiA8L2Rpdj4KPC9zZWN0aW9uPgo8L21haW4+Cjxmb290ZXI+TWlrcm9Cb3QgUHJvIFgg4oCiIHJlY29uc3RydcOtZG8gcGFyYSByZWR1emlyIHBvbnRvcyBkZSBmYWxoYSBlIGZ1bmNpb25hciBiZW0gZW0gdGVsYXMgbcOzdmVpcy48L2Zvb3Rlcj4KCjxzY3JpcHQ+CiJ1c2Ugc3RyaWN0IjsKY29uc3QgJD1zPT5kb2N1bWVudC5xdWVyeVNlbGVjdG9yKHMpOwpjb25zdCBzdGF0ZT17c2NyaXB0OiIiLGZpeGVkOiIiLGlzc3VlczpbXSxyZXBvcnQ6IiJ9OwoKZnVuY3Rpb24gbG9nKG1zZyl7Y29uc29sZS5sb2coIltNaWtyb0JvdF0iLG1zZyl9CmZ1bmN0aW9uIGRvd25sb2FkVGV4dChuYW1lLHRleHQsdHlwZT0idGV4dC9wbGFpbiIpewogY29uc3QgYmxvYj1uZXcgQmxvYihbdGV4dF0se3R5cGV9KTsgY29uc3QgYT1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCJhIik7CiBhLmhyZWY9VVJMLmNyZWF0ZU9iamVjdFVSTChibG9iKTsgYS5kb3dubG9hZD1uYW1lOyBkb2N1bWVudC5ib2R5LmFwcGVuZENoaWxkKGEpOyBhLmNsaWNrKCk7CiBzZXRUaW1lb3V0KCgpPT57VVJMLnJldm9rZU9iamVjdFVSTChhLmhyZWYpO2EucmVtb3ZlKCl9LDUwMCk7Cn0KZnVuY3Rpb24gc2V0VGFiKGlkKXsKIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoIi50YWIiKS5mb3JFYWNoKHg9PnguY2xhc3NMaXN0LnRvZ2dsZSgiYWN0aXZlIix4LmlkPT09aWQpKTsKIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoIm5hdiBidXR0b24iKS5mb3JFYWNoKHg9PnguY2xhc3NMaXN0LnRvZ2dsZSgiYWN0aXZlIix4LmRhdGFzZXQudGFiPT09aWQpKTsKfQpkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJuYXYgYnV0dG9uIikuZm9yRWFjaChiPT5iLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwoKT0+c2V0VGFiKGIuZGF0YXNldC50YWIpKSk7CiQoIiNnb1NjcmlwdCIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwoKT0+c2V0VGFiKCJzY3JpcHQiKSk7CgpmdW5jdGlvbiBhbmFseXplU2NyaXB0KHNyYyl7CiBjb25zdCBsaW5lcz1zcmMuc3BsaXQoL1xyP1xuLyksIGlzc3Vlcz1bXSwgZml4ZWQ9W107CiBsZXQgY29tbWVudHM9MCwgcnVsZXM9MDsKIGxpbmVzLmZvckVhY2goKGxpbmUsaSk9PnsKICBjb25zdCB0PWxpbmUudHJpbSgpOyBmaXhlZC5wdXNoKGxpbmUpOwogIGlmKCF0KXtyZXR1cm59CiAgaWYodC5zdGFydHNXaXRoKCIjIikpe2NvbW1lbnRzKys7cmV0dXJufQogIGlmKC9eXC9bQS1aYS16XS8udGVzdCh0KSlydWxlcysrOwogIGlmKC9wYXNzd29yZFxzKj1ccypbIiddP1teIFxuIiddKy9pLnRlc3QodCkpIGlzc3Vlcy5wdXNoKHtsaW5lOmkrMSx0eXBlOiJBTEVSVEEiLG1zZzoiUG9zc8OtdmVsIGNyZWRlbmNpYWwgZXhwb3N0YSBubyBzY3JpcHQuIn0pOwogIGlmKC9cL2lwXHMrYWRkcmVzc1xzK2FkZC9pLnRlc3QodCkmJiEvaW50ZXJmYWNlXHMqPS9pLnRlc3QodCkpIGlzc3Vlcy5wdXNoKHtsaW5lOmkrMSx0eXBlOiJSRVZJU0FSIixtc2c6IlJlZ3JhIGRlIElQIHNlbSBpbnRlcmZhY2UgZXhwbMOtY2l0YTsgY29uZmlybWUgYW50ZXMgZGUgYXBsaWNhci4ifSk7CiAgaWYoL21hc3F1ZXJhZGUvaS50ZXN0KHQpJiYhL3NyYy1uYXQvaS50ZXN0KHQpKSB7fQogIGlmKC9cL2ludGVyZmFjZVxzK2JyaWRnZVxzK3BvcnRccythZGQvaS50ZXN0KHQpJiYhL2JyaWRnZVxzKj0vaS50ZXN0KHQpKSBpc3N1ZXMucHVzaCh7bGluZTppKzEsdHlwZToiUkVWSVNBUiIsbXNnOiJCcmlkZ2UgcG9ydCBzZW0gYnJpZGdlIGV4cGzDrWNpdGEuIn0pOwogIGlmKC9cL2lwXHMrcm91dGVccythZGQvaS50ZXN0KHQpJiYhL2dhdGV3YXlccyo9fHJvdXRpbmctdGFibGVccyo9L2kudGVzdCh0KSkgaXNzdWVzLnB1c2goe2xpbmU6aSsxLHR5cGU6IlJFVklTQVIiLG1zZzoiUm90YSBzZW0gZ2F0ZXdheS90YWJlbGEgZXhwbMOtY2l0YS4ifSk7CiAgaWYoL1wvaXBccytkaGNwLXNlcnZlclxzK25ldHdvcmtccythZGQvaS50ZXN0KHQpJiYhL2FkZHJlc3Nccyo9L2kudGVzdCh0KSkgaXNzdWVzLnB1c2goe2xpbmU6aSsxLHR5cGU6IlJFVklTQVIiLG1zZzoiUmVkZSBESENQIHNlbSBhZGRyZXNzIGV4cGzDrWNpdG8uIn0pOwogfSk7CiByZXR1cm4ge2xpbmVzLGlzc3VlcyxmaXhlZDpmaXhlZC5qb2luKCJcbiIpLGNvbW1lbnRzLHJ1bGVzfTsKfQpmdW5jdGlvbiByZW5kZXJBbmFseXNpcyhyKXsKICQoIiNydWxlcyIpLnRleHRDb250ZW50PXIucnVsZXM7ICQoIiNhbGVydHMiKS50ZXh0Q29udGVudD1yLmlzc3Vlcy5sZW5ndGg7CiAkKCIjaGVhbHRoIikudGV4dENvbnRlbnQ9ci5pc3N1ZXMubGVuZ3RoPyJSRVZJU0FSIjoiT0siOwogaWYoIXIuaXNzdWVzLmxlbmd0aCl7JCgiI2FuYWx5c2lzIikuY2xhc3NOYW1lPSJzdGF0dXMgb2siOyQoIiNhbmFseXNpcyIpLnRleHRDb250ZW50PSLinJMgTmVuaHVtIGVycm8gZXN0cnV0dXJhbCBzaW1wbGVzIGVuY29udHJhZG8uIEEgY29uZmlndXJhw6fDo28gYWluZGEgZGV2ZSBzZXIgdmFsaWRhZGEgbm8gZXF1aXBhbWVudG8gYW50ZXMgZGUgYXBsaWNhci4iO3JldHVybn0KICQoIiNhbmFseXNpcyIpLmNsYXNzTmFtZT0ic3RhdHVzIHdhcm4iOwogJCgiI2FuYWx5c2lzIikudGV4dENvbnRlbnQ9ci5pc3N1ZXMubWFwKHg9PmBMaW5oYSAke3gubGluZX0g4oCiICR7eC50eXBlfTogJHt4Lm1zZ31gKS5qb2luKCJcbiIpOwp9CiQoIiNhbmFseXplIikuYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLCgpPT57CiBzdGF0ZS5zY3JpcHQ9JCgiI3NjcmlwdElucHV0IikudmFsdWU7IGNvbnN0IHI9YW5hbHl6ZVNjcmlwdChzdGF0ZS5zY3JpcHQpOyBzdGF0ZS5pc3N1ZXM9ci5pc3N1ZXM7IHN0YXRlLmZpeGVkPXIuZml4ZWQ7CiAkKCIjZml4ZWRTY3JpcHQiKS52YWx1ZT1zdGF0ZS5maXhlZDsgcmVuZGVyQW5hbHlzaXMocik7IGxvZygiQXVkaXRvcmlhIGNvbmNsdcOtZGEiKTsKfSk7CiQoIiNjbGVhciIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwoKT0+eyQoIiNzY3JpcHRJbnB1dCIpLnZhbHVlPSIiOyQoIiNmaXhlZFNjcmlwdCIpLnZhbHVlPSIiOyQoIiNhbmFseXNpcyIpLnRleHRDb250ZW50PSJOZW5odW1hIGFuw6FsaXNlIGV4ZWN1dGFkYS4iOyQoIiNhbGVydHMiKS50ZXh0Q29udGVudD0iMCI7JCgiI3J1bGVzIikudGV4dENvbnRlbnQ9IjAifSk7CiQoIiNjb3B5IikuYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLGFzeW5jKCk9Pntjb25zdCB0PSQoIiNzY3JpcHRJbnB1dCIpLnZhbHVlO2lmKCF0KXJldHVybjt0cnl7YXdhaXQgbmF2aWdhdG9yLmNsaXBib2FyZC53cml0ZVRleHQodCk7YWxlcnQoIlNjcmlwdCBjb3BpYWRvLiIpfWNhdGNoe2FsZXJ0KCJPIG5hdmVnYWRvciBuw6NvIHBlcm1pdGl1IGNvcGlhciBhdXRvbWF0aWNhbWVudGUuIil9fSk7CiQoIiN1c2VGaXhlZCIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwoKT0+eyQoIiNzY3JpcHRJbnB1dCIpLnZhbHVlPSQoIiNmaXhlZFNjcmlwdCIpLnZhbHVlO2FsZXJ0KCJDb3JyZcOnw6NvIGNhcnJlZ2FkYSBubyBhbmFsaXNhZG9yLiBFeGVjdXRlIGEgYW7DoWxpc2Ugbm92YW1lbnRlLiIpfSk7CiQoIiNkb3dubG9hZFNjcmlwdCIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwoKT0+ZG93bmxvYWRUZXh0KCJtaWtyb3Rpay1zY3JpcHQucnNjIiwkKCIjc2NyaXB0SW5wdXQiKS52YWx1ZSkpOwokKCIjZG93bmxvYWRGaXhlZCIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIiwoKT0+ZG93bmxvYWRUZXh0KCJtaWtyb3Rpay1zY3JpcHQtY29ycmlnaWRvLnJzYyIsJCgiI2ZpeGVkU2NyaXB0IikudmFsdWUpKTsKJCgiI2ZpbGVJbnB1dCIpLmFkZEV2ZW50TGlzdGVuZXIoImNoYW5nZSIsYXN5bmMgZT0+e2NvbnN0IGY9ZS50YXJnZXQuZmlsZXNbMF07aWYoIWYpcmV0dXJuOyQoIiNzY3JpcHRJbnB1dCIpLnZhbHVlPWF3YWl0IGYudGV4dCgpO3NldFRhYigic2NyaXB0Iik7JCgiI2FuYWx5emUiKS5jbGljaygpfSk7CgpmdW5jdGlvbiBydW5EaWFnKCl7CiBjb25zdCByb3dzPVsKICBbIkphdmFTY3JpcHQiLHR5cGVvZiB3aW5kb3c9PT0ib2JqZWN0Ij8iT0siOiJGQUxIQSJdLAogIFsiRE9NIixkb2N1bWVudC5ib2R5PyJPSyI6IkZBTEhBIl0sCiAgWyJMb2NhbFN0b3JhZ2UiLCgoKT0+e3RyeXtsb2NhbFN0b3JhZ2Uuc2V0SXRlbSgiX21iIiwiMSIpO2xvY2FsU3RvcmFnZS5yZW1vdmVJdGVtKCJfbWIiKTtyZXR1cm4iT0sifWNhdGNoe3JldHVybiJJTkRJU1BPTsONVkVMIn19KSgpXSwKICBbIk9ubGluZSIsbmF2aWdhdG9yLm9uTGluZT8iT05MSU5FIjoiT0ZGTElORSJdLAogIFsiSFRUUFMiLGxvY2F0aW9uLnByb3RvY29sPT09Imh0dHBzOiI/IlNJTSI6Ik7Dg08iXSwKICBbIlNlcnZpY2UgV29ya2VyIiwoInNlcnZpY2VXb3JrZXIiIGluIG5hdmlnYXRvcik/IkRJU1BPTsONVkVMIjoiTsODTyBESVNQT07DjVZFTCJdLAogIFsiVGVsYSIsYCR7aW5uZXJXaWR0aH3DlyR7aW5uZXJIZWlnaHR9YF0KIF07CiAkKCIjZGlhZ1Jlc3VsdCIpLnRleHRDb250ZW50PXJvd3MubWFwKHI9PmAke3JbMF19OiAke3JbMV19YCkuam9pbigiXG4iKTsKfQokKCIjcnVuRGlhZyIpLmFkZEV2ZW50TGlzdGVuZXIoImNsaWNrIixydW5EaWFnKTsKcnVuRGlhZygpOwoKZnVuY3Rpb24gbWFrZVJlcG9ydCgpewogY29uc3QgY2xpZW50PSQoIiNjbGllbnQiKS52YWx1ZS50cmltKCl8fCJOw6NvIGluZm9ybWFkbyIsIG5vdGVzPSQoIiNub3RlcyIpLnZhbHVlLnRyaW0oKXx8IlNlbSBvYnNlcnZhw6fDtWVzLiI7CiBjb25zdCB0aW1lPW5ldyBEYXRlKCkudG9Mb2NhbGVTdHJpbmcoInB0LUJSIik7CiBzdGF0ZS5yZXBvcnQ9YFJFTEFUw5NSSU8gVMOJQ05JQ08g4oCUIE1JS1JPQk9UIFBSTyBYXG5cbkxvY2FsL0NsaWVudGU6ICR7Y2xpZW50fVxuRGF0YTogJHt0aW1lfVxuU3RhdHVzIGRhIGF1ZGl0b3JpYTogJHtzdGF0ZS5pc3N1ZXMubGVuZ3RoPyJSRVZJU0FSIjoiT0sifVxuUXVhbnRpZGFkZSBkZSBhbGVydGFzOiAke3N0YXRlLmlzc3Vlcy5sZW5ndGh9XG5cbk9CU0VSVkHDh8OVRVNcbiR7bm90ZXN9XG5cbk5PVEFcbkVzdGUgcmVsYXTDs3JpbyByZWdpc3RyYSBhbsOhbGlzZSBubyBuYXZlZ2Fkb3IuIEFwbGljYcOnw7VlcyBkZSBjb25maWd1cmHDp8OjbyBubyBNaWtyb1RpayBkZXZlbSBzZXIgdmFsaWRhZGFzIG5vIGVxdWlwYW1lbnRvIGFudGVzIGRhIGV4ZWN1w6fDo28uYDsKICQoIiNyZXBvcnRQcmV2aWV3IikudGV4dENvbnRlbnQ9c3RhdGUucmVwb3J0Owp9CiQoIiNtYWtlUmVwb3J0IikuYWRkRXZlbnRMaXN0ZW5lcigiY2xpY2siLG1ha2VSZXBvcnQpOwokKCIjZG93bmxvYWRSZXBvcnQiKS5hZGRFdmVudExpc3RlbmVyKCJjbGljayIsKCk9PntpZighc3RhdGUucmVwb3J0KW1ha2VSZXBvcnQoKTtkb3dubG9hZFRleHQoIk1pa3JvQm90X1JlbGF0b3Jpb19UZWNuaWNvLnR4dCIsc3RhdGUucmVwb3J0KX0pOwoKJCgiI2Jyb3dzZXJTdGF0dXMiKS50ZXh0Q29udGVudD1gUMOhZ2luYSBjYXJyZWdhZGEgY29ycmV0YW1lbnRlLgpVUkw6ICR7bG9jYXRpb24uaHJlZn0KSmF2YVNjcmlwdDogT0sKSW50ZXJmYWNlOiBPSwpEYXRhOiAke25ldyBEYXRlKCkudG9Mb2NhbGVTdHJpbmcoInB0LUJSIil9YDsKd2luZG93LmFkZEV2ZW50TGlzdGVuZXIoImVycm9yIiwoKT0+eyQoIiNqc0Vycm9ycyIpLnRleHRDb250ZW50PVN0cmluZyhOdW1iZXIoJCgiI2pzRXJyb3JzIikudGV4dENvbnRlbnQpKzEpOyQoIiNoZWFsdGgiKS50ZXh0Q29udGVudD0iRVJSTyJ9KTsKbG9nKCJNaWtyb0JvdCBpbmljaWFkbyBzZW0gZGVwZW5kw6puY2lhcyBleHRlcm5hcy4iKTsKYXN5bmMgZnVuY3Rpb24gY2hlY2tQeXRob25Db3JlKCl7CiAgY29uc3QgZWw9JCgiI3B5dGhvblN0YXR1cyIpOwogIHRyeXsKICAgIGNvbnN0IGNvbnRyb2xsZXI9bmV3IEFib3J0Q29udHJvbGxlcigpOwogICAgY29uc3QgdGltZXI9c2V0VGltZW91dCgoKT0+Y29udHJvbGxlci5hYm9ydCgpLDE4MDApOwogICAgY29uc3Qgcj1hd2FpdCBmZXRjaCgiL2FwaS9oZWFsdGgiLHtjYWNoZToibm8tc3RvcmUiLHNpZ25hbDpjb250cm9sbGVyLnNpZ25hbH0pOwogICAgY2xlYXJUaW1lb3V0KHRpbWVyKTsKICAgIGlmKCFyLm9rKSB0aHJvdyBuZXcgRXJyb3IoIkhUVFAgIityLnN0YXR1cyk7CiAgICBjb25zdCB4PWF3YWl0IHIuanNvbigpOwogICAgZWwuY2xhc3NOYW1lPSJzdGF0dXMgb2siOwogICAgZWwudGV4dENvbnRlbnQ9YOKckyBQeXRob24gQ29yZSBPTkxJTkUg4oCiICR7eC52ZXJzaW9ufHwiT0sifSDigKIgdXB0aW1lICR7eC51cHRpbWU/PyItIn1zYDsKICB9Y2F0Y2goZSl7CiAgICBlbC5jbGFzc05hbWU9InN0YXR1cyB3YXJuIjsKICAgIGVsLnRleHRDb250ZW50PSLimqAgUHl0aG9uIENvcmUgYWd1YXJkYW5kby9yZWNvbmVjdGFuZG/igKYiOwogIH0KfQpjaGVja1B5dGhvbkNvcmUoKTsKc2V0SW50ZXJ2YWwoY2hlY2tQeXRob25Db3JlLDUwMDApOwoKPC9zY3JpcHQ+CjwvYm9keT4KPC9odG1sPgo="""
+ROOT = Path(__file__).resolve().parent
+HTML = ROOT / "mikrobot.html"
+DEFAULT_PORT = 8765
 
-class SafeHTTPServer(ThreadingHTTPServer):
-    allow_reuse_address = True
-    daemon_threads = True
+def choose_port():
+    try:
+        p = int(os.environ.get("PORT", str(DEFAULT_PORT)))
+        return p if 1 <= p <= 65535 else DEFAULT_PORT
+    except ValueError:
+        return DEFAULT_PORT
+
+def json_out(handler, data, status=200):
+    raw = json.dumps(data, ensure_ascii=False).encode()
+    handler.send_response(status)
+    handler.send_header("Content-Type", "application/json; charset=utf-8")
+    handler.send_header("Content-Length", str(len(raw)))
+    handler.send_header("Access-Control-Allow-Origin", "*")
+    handler.end_headers()
+    handler.wfile.write(raw)
 
 class Handler(BaseHTTPRequestHandler):
-    protocol_version = "HTTP/1.1"
+    def log_message(self, fmt, *args):
+        print("[HTTP]", fmt % args)
 
-    def send_data(self, data, content_type="application/json; charset=utf-8", status=200):
-        try:
-            self.send_response(status)
-            self.send_header("Content-Type", content_type)
-            self.send_header("Content-Length", str(len(data)))
-            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
-            self.send_header("Pragma", "no-cache")
-            self.send_header("Connection", "close")
-            self.end_headers()
-            self.wfile.write(data)
-            self.wfile.flush()
-        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
-            pass
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin","*")
+        self.send_header("Access-Control-Allow-Headers","Content-Type")
+        self.end_headers()
 
     def do_GET(self):
-        path = self.path.split("?", 1)[0]
-        if path in ("/", "/index.html"):
-            return self.send_data(base64.b64decode(HTML_B64), "text/html; charset=utf-8")
+        path = urlparse(self.path).path
         if path == "/api/health":
-            body = json.dumps({
-                "ok": True,
-                "version": "REBUILD-40K-APK-40.1",
-                "python": platform.python_version(),
-                "uptime": round(time.monotonic() - START, 1),
-                "mode": "read-only"
-            }).encode()
-            return self.send_data(body)
-        if path == "/api/ping":
-            return self.send_data(b'{"ok":true}')
-        return self.send_data(b'{"ok":false,"error":"not_found"}', status=404)
+            return json_out(self, {"ok":True,"service":"MikroBot Pro X","port":PORT,"python":platform.python_version()})
+        if path == "/api/system":
+            return json_out(self, {"ok":True,"os":platform.platform(),"python":platform.python_version(),"hostname":socket.gethostname()})
+        if path == "/api/network":
+            try:
+                host=socket.gethostname()
+                ip=socket.gethostbyname(host)
+            except Exception:
+                ip="indisponível"
+            return json_out(self, {"ok":True,"hostname":host,"local_ip":ip})
+        if path == "/api/internet":
+            t=time.time()
+            try:
+                with urllib.request.urlopen("https://www.google.com/generate_204", timeout=4) as r:
+                    return json_out(self, {"ok":True,"http_status":r.status,"latency_ms":round((time.time()-t)*1000,1)})
+            except Exception as e:
+                return json_out(self, {"ok":False,"error":str(e)})
+        if path == "/api/diagnostic":
+            return json_out(self, {"ok":True,"diagnostic":[
+                "Serviço Python respondendo.",
+                "Interface HTML carregada.",
+                "Para MikroTik, valide WAN, gateway, DNS, DHCP/PPPoE, bridge e firewall.",
+                "Não são executadas alterações automáticas no equipamento."
+            ]})
+        if path in ("/","/index.html"):
+            try:
+                raw=HTML.read_bytes()
+            except FileNotFoundError:
+                return json_out(self, {"ok":False,"error":"mikrobot.html não encontrado"},404)
+            self.send_response(200)
+            self.send_header("Content-Type","text/html; charset=utf-8")
+            self.send_header("Content-Length",str(len(raw)))
+            self.end_headers(); self.wfile.write(raw); return
+        self.send_error(404)
 
-    def log_message(self, *args):
-        pass
-
-def main():
-    while True:
+    def do_POST(self):
+        path=urlparse(self.path).path
+        if path != "/api/analyze": return self.send_error(404)
         try:
-            server = SafeHTTPServer(("127.0.0.1", PORT), Handler)
-            server.serve_forever(poll_interval=0.5)
-            return
-        except OSError as exc:
-            print("MikroBot local server error:", exc)
-            time.sleep(1.0)
-        except Exception as exc:
-            print("MikroBot service error:", exc)
-            time.sleep(1.0)
+            n=int(self.headers.get("Content-Length","0"))
+            body=json.loads(self.rfile.read(n) or b"{}")
+            cfg=str(body.get("config",""))
+            checks=[]
+            low=cfg.lower()
+            for term,label in [("interface","interfaces"),("bridge","bridge"),("dhcp","DHCP"),("pppoe","PPPoE"),("firewall","firewall"),("dns","DNS"),("ip address","endereços IP")]:
+                if term in low: checks.append(f"Encontrado: {label}")
+            return json_out(self, {"ok":True,"checks":checks or ["Nenhum bloco reconhecido; revise o texto inserido."],"note":"Análise somente informativa; revise antes de aplicar mudanças."})
+        except Exception as e:
+            return json_out(self, {"ok":False,"error":str(e)},400)
 
-if __name__ == "__main__":
-    main()
+PORT=choose_port()
+server=ThreadingHTTPServer(("0.0.0.0",PORT),Handler)
+print(f"MikroBot Pro X — Python Core em http://0.0.0.0:{PORT}")
+try: server.serve_forever()
+except KeyboardInterrupt: pass
+finally: server.server_close()
