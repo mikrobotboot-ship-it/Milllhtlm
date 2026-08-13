@@ -4,55 +4,83 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#02070b">
-<title>MikroBot JARVIS PRO</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<title>MikroBot JARVIS PRO • Offline First</title>
 <style>
-:root{--bg:#02070b;--panel:#07131b;--line:#183746;--txt:#ebffff;--mut:#8aa6b0;--cyan:#00e5ff;--green:#00f5a0}
-*{box-sizing:border-box}
-body{margin:0;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(circle at 50% -15%,#153b45 0,transparent 45%),linear-gradient(180deg,#02070b,#07131b);min-height:100vh}
-header{position:sticky;top:0;z-index:2;padding:14px 16px;background:#02070ded;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
-.top{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:clamp(20px,5vw,34px);font-weight:950}.logo b{color:var(--cyan)}.online{color:var(--green);font-size:12px}
-main{max-width:1100px;margin:auto;padding:14px}
-.hero,.card{background:linear-gradient(145deg,#09161e,#061017);border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 50px #0008}
-.hero{padding:20px}.hero h1{margin:0;font-size:clamp(30px,8vw,54px)}.muted{color:var(--mut)}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:12px}
-.card{padding:15px}.label{font-size:11px;color:var(--mut);letter-spacing:1px}.metric{font-size:28px;font-weight:900;margin-top:5px}
-.bar{height:8px;background:#10262f;border-radius:99px;overflow:hidden;margin-top:7px}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .25s}
-pre{white-space:pre-wrap;word-break:break-word;background:#020609;border:1px solid #102631;border-radius:12px;padding:12px}
-.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
-button{border:1px solid #214451;border-radius:12px;padding:12px 14px;background:#0f2530;color:var(--txt);font-weight:800}
-button.primary{border:0;background:linear-gradient(135deg,var(--cyan),var(--green));color:#001219}
-@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:520px){.grid{grid-template-columns:1fr 1fr}.actions button{flex:1 1 44%}.metric{font-size:23px}}
+:root{--bg:#02070b;--p:#07131b;--p2:#0b1b24;--line:#193846;--txt:#eaffff;--mut:#89a8b3;--c:#00e5ff;--g:#00f5a0;--y:#ffd166;--r:#ff5570}
+*{box-sizing:border-box}body{margin:0;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(circle at 50% -15%,#153b45 0,transparent 42%),linear-gradient(180deg,#02070b,#07131b);min-height:100vh}
+header{position:sticky;top:0;z-index:9;padding:13px 15px;background:#02070dea;border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}.top{max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center}.logo{font-size:clamp(20px,5vw,34px);font-weight:950}.logo b{color:var(--c)}.pill{font-size:11px;color:var(--g);border:1px solid #145b49;padding:7px 9px;border-radius:999px}
+main{max-width:1180px;margin:auto;padding:14px}.hero,.card{background:linear-gradient(145deg,#09161e,#061017);border:1px solid var(--line);border-radius:19px;box-shadow:0 16px 55px #0008}.hero{padding:21px}.hero h1{margin:0;font-size:clamp(31px,8vw,56px);line-height:1}.mut{color:var(--mut)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}button{border:1px solid #214755;border-radius:11px;padding:11px 14px;background:#102531;color:var(--txt);font-weight:850}button.primary{border:0;background:linear-gradient(135deg,var(--c),var(--g));color:#001219}.tabs{display:flex;gap:7px;overflow-x:auto;margin:13px 0}.tabs button{white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{padding:15px}.label{font-size:11px;letter-spacing:1px;color:var(--mut)}.metric{font-size:28px;font-weight:900;margin-top:4px}.bar{height:8px;background:#102631;border-radius:99px;overflow:hidden;margin-top:8px}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--g))}pre{white-space:pre-wrap;word-break:break-word;background:#020609;border:1px solid #112833;border-radius:11px;padding:12px;max-height:390px;overflow:auto}textarea,input{width:100%;background:#03090d;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:12px}textarea{min-height:130px;resize:vertical}.hidden{display:none}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.mode{display:inline-flex;gap:7px;align-items:center;background:#08221c;border:1px solid #155f4a;color:var(--g);border-radius:9px;padding:6px 9px;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--g)}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}@media(max-width:520px){main{padding:9px}.hero{padding:17px}.grid{grid-template-columns:1fr 1fr}.metric{font-size:23px}.actions button{flex:1 1 44%}}
 </style>
 </head>
 <body>
-<header><div class="top"><div class="logo">⚡ <b>MIKROBOT</b> JARVIS PRO</div><div class="online">● CORE ONLINE</div></div></header>
+<header><div class="top"><div class="logo">⚡ <b>MIKROBOT</b> JARVIS PRO</div><div class="pill"><span class="dot"></span> OFFLINE-FIRST</div></div></header>
 <main>
 <section class="hero">
 <h1>COMMAND CENTER</h1>
-<p class="muted">Núcleo Python estável • telemetria • rede • interface responsiva</p>
+<p class="mut">O núcleo local funciona mesmo sem Internet. Recursos externos entram quando a conexão voltar.</p>
+<div class="mode"><span class="dot"></span><span id="modeText">ONLINE</span></div>
 <div class="actions">
-<button class="primary" onclick="refreshAll()">⚡ ATUALIZAR</button>
-<button onclick="ping()">🌐 INTERNET</button>
+<button class="primary" onclick="refreshAll()">⚡ VERIFICAR TUDO</button>
+<button onclick="offlineTest()">🧠 IA LOCAL</button>
+<button onclick="turbo()">🚀 TESTE TURBO</button>
 </div>
 </section>
-<section class="grid">
-<div class="card"><div class="label">CPU</div><div id="cpu" class="metric">—</div><div class="bar"><div id="cb" class="fill"></div></div></div>
-<div class="card"><div class="label">RAM</div><div id="ram" class="metric">—</div><div class="bar"><div id="rb" class="fill"></div></div></div>
-<div class="card"><div class="label">DISCO</div><div id="disk" class="metric">—</div><div class="bar"><div id="db" class="fill"></div></div></div>
-<div class="card"><div class="label">SERVIDOR</div><div id="status" class="metric" style="color:var(--green)">ONLINE</div></div>
+
+<section class="grid" style="margin-top:12px">
+<div class="card"><div class="label">CPU</div><div id="cpu" class="metric">—</div><div class="bar"><div id="cpub" class="fill"></div></div></div>
+<div class="card"><div class="label">RAM</div><div id="ram" class="metric">—</div><div class="bar"><div id="ramb" class="fill"></div></div></div>
+<div class="card"><div class="label">DISCO</div><div id="disk" class="metric">—</div><div class="bar"><div id="diskb" class="fill"></div></div></div>
+<div class="card"><div class="label">CONECTIVIDADE</div><div id="net" class="metric" style="color:var(--g)">—</div></div>
 </section>
-<section class="card" style="margin-top:12px"><h2>📡 Rede</h2><pre id="network">Carregando…</pre></section>
-<section class="card" style="margin-top:12px"><h2>🧠 Núcleo</h2><pre id="result">Sistema inicializado.</pre></section>
+
+<div class="tabs">
+<button onclick="tab('ai')">🧠 IA Local</button>
+<button onclick="tab('rsc')">🛠️ MikroTik</button>
+<button onclick="tab('cam')">📷 Câmeras</button>
+<button onclick="tab('dict')">📖 Dicionário</button>
+<button onclick="tab('sys')">📡 Rede</button>
+</div>
+
+<section id="ai" class="two">
+<div class="card"><h2>🧠 IA Local</h2><textarea id="q" placeholder="Ex.: analise um script MikroTik..."></textarea><div class="actions"><button class="primary" onclick="offlineTest()">Executar</button></div><pre id="answer">Pronto.</pre></div>
+<div class="card"><h2>📡 Estado da rede</h2><pre id="network">Carregando...</pre></div>
+</section>
+
+<section id="rsc" class="card hidden">
+<h2>🛠️ MikroTik — validação offline</h2><p class="mut">Validação local de estrutura. Sem executar alterações.</p><textarea id="script" placeholder="/ip ..."></textarea><div class="actions"><button class="primary" onclick="validate()">Validar script</button></div><pre id="validation">Nenhum resultado.</pre>
+</section>
+
+<section id="cam" class="card hidden">
+<h2>📷 Assistente de Câmeras</h2><p class="mut">Checklist local para Hikvision, Milesight e ONVIF/RTSP.</p><div class="actions"><button onclick="camera('hikvision')">Hikvision</button><button onclick="camera('milesight')">Milesight</button><button onclick="camera('generic')">ONVIF/RTSP</button></div><pre id="camera">Selecione o fabricante.</pre>
+</section>
+
+<section id="dict" class="card hidden">
+<h2>📖 Dicionário técnico local</h2><pre id="knowledge">Carregando...</pre>
+</section>
+
+<section id="sys" class="card hidden">
+<h2>📡 Rede local</h2><pre id="network2">Carregando...</pre>
+</section>
+
+<section class="card" style="margin-top:12px"><h2>⚙️ Autogerenciador</h2><p class="mut">Verificação interna a cada 10 segundos. O modo atual não encerra processos do sistema.</p><pre id="watch">Watchdog local ativo.</pre></section>
 </main>
 <script>
 const $=id=>document.getElementById(id);
-async function api(u){const r=await fetch(u);if(!r.ok)throw Error("HTTP "+r.status);return r.json()}
-function meter(id,bar,v){$(id).textContent=v+"%";$(bar).style.width=Math.max(0,Math.min(100,v))+"%"}
-async function refreshAll(){try{const s=await api('/api/system');meter('cpu','cb',s.cpu);meter('ram','rb',s.ram);meter('disk','db',s.disk);const n=await api('/api/network');$('network').textContent=JSON.stringify(n,null,2);$('result').textContent=JSON.stringify(s,null,2)}catch(e){$('status').textContent='ERRO';$('result').textContent=e.message}}
-async function ping(){const t=performance.now();try{await fetch('https://www.gstatic.com/generate_204',{cache:'no-store'});$('result').textContent='Internet OK • '+Math.round(performance.now()-t)+' ms'}catch(e){$('result').textContent='Internet indisponível: '+e.message}}
-const ws=new WebSocket((location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/ws');ws.onmessage=e=>{const d=JSON.parse(e.data);meter('cpu','cb',d.cpu);meter('ram','rb',d.ram);meter('disk','db',d.disk)};refreshAll();setInterval(refreshAll,10000);
+function tab(id){document.querySelectorAll('main>section.two,main>section.card:not(.hero)').forEach(s=>{if(s.id&&['ai','rsc','cam','dict','sys'].includes(s.id))s.classList.add('hidden')});$(id).classList.remove('hidden')}
+async function api(u,o){const r=await fetch(u,o);const t=await r.text();let d;try{d=JSON.parse(t)}catch(e){throw Error(t.slice(0,120))}if(!r.ok)throw Error(d.error||('HTTP '+r.status));return d}
+function meter(id,bar,v){$(id).textContent=v+'%';$(bar).style.width=Math.max(0,Math.min(100,v))+'%'}
+async function refreshAll(){try{const s=await api('/api/system');meter('cpu','cpub',s.cpu);meter('ram','ramb',s.ram);meter('disk','diskb',s.disk);const n=await api('/api/network');$('network').textContent=JSON.stringify(n,null,2);$('network2').textContent=JSON.stringify(n,null,2);const online=navigator.onLine; $('net').textContent=online?'ONLINE':'OFFLINE'; $('modeText').textContent=online?'ONLINE + LOCAL':'LOCAL OFFLINE'}catch(e){$('net').textContent='LOCAL'}}
+async function offlineTest(){const q=$('q').value.trim();if(!q){$('answer').textContent='Digite uma pergunta.';return}try{$('answer').textContent=JSON.stringify(await api('/api/offline',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:q})}),null,2)}catch(e){$('answer').textContent=e.message}}
+async function validate(){try{$('validation').textContent=JSON.stringify(await api('/api/validate-script',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:$('script').value})}),null,2)}catch(e){$('validation').textContent=e.message}}
+async function camera(b){try{$('camera').textContent=JSON.stringify(await api('/api/camera',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:b})}),null,2)}catch(e){$('camera').textContent=e.message}}
+async function knowledge(){try{$('knowledge').textContent=JSON.stringify(await api('/api/knowledge'),null,2)}catch(e){}}
+function turbo(){const start=performance.now();fetch('https://www.gstatic.com/generate_204',{cache:'no-store'}).then(r=>alert('Conexão externa: '+r.status+'\\nLatência aproximada: '+Math.round(performance.now()-start)+' ms')).catch(()=>alert('Sem Internet externa. O núcleo offline continua funcionando.'))}
+const ws=new WebSocket((location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/ws');ws.onmessage=e=>{const d=JSON.parse(e.data);meter('cpu','cpub',d.cpu);meter('ram','ramb',d.ram);meter('disk','diskb',d.disk);$('watch').textContent='Watchdog ativo • CPU '+d.cpu+'% • RAM '+d.ram+'% • atualização contínua'};ws.onerror=()=>{};
+window.addEventListener('online',refreshAll);window.addEventListener('offline',refreshAll);
+refreshAll();knowledge();setInterval(refreshAll,10000);
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}
 </script>
 </body>
 </html>
