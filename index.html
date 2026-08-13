@@ -3,62 +3,98 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07100d">
-<title>MikroBot Pro X — SUPREMO</title>
+<meta name="theme-color" content="#02070b">
+<title>MikroBot JARVIS PRO</title>
 <style>
-:root{--bg:#050a08;--card:#0b1713;--line:#18342a;--accent:#00e676;--text:#eefbf4;--muted:#9ab5a7;--warn:#ffd54f;--bad:#ff6b6b}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#10251c,#050a08 55%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
-header{position:sticky;top:0;z-index:5;padding:16px;background:#07100df2;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
-h1{font-size:21px;margin:0 0 4px}h2{font-size:16px}.muted{color:var(--muted)}
-main{max-width:900px;margin:auto;padding:14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.card{background:linear-gradient(180deg,#0c1a15,#09120f);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 8px 25px #0006}
-button{width:100%;border:1px solid #20523d;background:#0d2119;color:var(--text);border-radius:12px;padding:12px;font-weight:700}
-button.primary{background:#00c853;color:#001b0c;border-color:#00e676}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
-.stat{padding:12px;border:1px solid var(--line);border-radius:12px}.ok{color:#00e676}.warn{color:var(--warn)}.bad{color:var(--bad)}
-pre{white-space:pre-wrap;word-break:break-word;background:#030705;border-radius:12px;padding:12px;min-height:80px}
-input,textarea,select{width:100%;background:#06100c;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px}
-@media(max-width:600px){.grid{grid-template-columns:1fr 1fr}main{padding:9px}}
+:root{--bg:#02070b;--p:#07131b;--p2:#0b1b25;--line:#193b49;--txt:#eaffff;--mut:#8eacb7;--cyan:#00e5ff;--green:#00f5a0;--yellow:#ffd166;--red:#ff5572}
+*{box-sizing:border-box}body{margin:0;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(circle at 50% -12%,#143c47,transparent 42%),linear-gradient(180deg,#02070b,#07131b);min-height:100vh}
+header{position:sticky;top:0;z-index:10;background:#02070ce8;border-bottom:1px solid var(--line);backdrop-filter:blur(14px);padding:13px 16px}.top{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center}.logo{font-size:clamp(20px,5vw,34px);font-weight:950}.logo span{color:var(--cyan)}.online{color:var(--green);font-size:12px}
+main{max-width:1200px;margin:auto;padding:15px}.hero,.card{background:linear-gradient(145deg,#09161e,#061017);border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 60px #0008}.hero{padding:22px}.hero h1{margin:0;font-size:clamp(29px,8vw,56px);line-height:1}.mut{color:var(--mut)}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}button{border:1px solid #244a58;border-radius:12px;padding:12px 15px;background:#102734;color:var(--txt);font-weight:850;cursor:pointer}button.primary{border:0;background:linear-gradient(135deg,var(--cyan),var(--green));color:#001219}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:13px}.card{padding:16px}.label{color:var(--mut);font-size:11px;letter-spacing:1px}.metric{font-size:28px;font-weight:900;margin-top:4px}.good{color:var(--green)}.wide{grid-column:1/-1}.cols{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}textarea,input{width:100%;background:#03090d;border:1px solid var(--line);border-radius:13px;padding:13px;color:var(--txt)}textarea{min-height:140px;resize:vertical}pre{white-space:pre-wrap;word-break:break-word;background:#020608;border:1px solid #112833;border-radius:12px;padding:13px;min-height:100px;max-height:450px;overflow:auto}.bar{height:8px;border-radius:99px;background:#102732;overflow:hidden;margin-top:8px}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .3s}.tabbar{display:flex;gap:7px;overflow-x:auto;margin-top:14px}.tabbar button{white-space:nowrap}.hidden{display:none}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}}@media(max-width:520px){main{padding:9px}.hero{padding:17px}.grid{grid-template-columns:1fr 1fr}.actions button{flex:1 1 44%}}
 </style>
 </head>
 <body>
-<header><h1>🤖 MikroBot Pro X — SUPREMO</h1><div class="muted">JARVIS de Redes • diagnóstico local • Python Core</div></header>
+<header><div class="top"><div class="logo">⚡ <span>MIKROBOT</span> JARVIS PRO</div><div class="online">● CORE ONLINE</div></div></header>
 <main>
-<section class="card">
-<h2>🚀 Fluxo automático</h2>
-<p class="muted">1. Identificar → 2. analisar → 3. testar conectividade → 4. localizar causa provável → 5. sugerir correção → 6. validar → 7. relatório.</p>
-<div class="row"><button class="primary" onclick="analisar()">ANALISAR CONFIGURAÇÃO</button><button onclick="internet()">TESTAR INTERNET</button></div>
-</section>
-<section class="grid">
-<div class="card"><h2>🧠 IA local</h2><button onclick="diagnostico()">Diagnóstico lógico</button></div>
-<div class="card"><h2>🌐 Internet</h2><button onclick="internet()">Teste web</button></div>
-<div class="card"><h2>📡 Rede</h2><button onclick="rede()">Ver conexão</button></div>
-<div class="card"><h2>🖥️ Sistemas</h2><button onclick="sistemas()">Ver ambiente</button></div>
-</section>
-<section class="card">
-<h2>🐍 Python Core</h2>
-<div class="grid">
-<div class="stat">Status: <b id="py" class="warn">verificando</b></div>
-<div class="stat">Porta: <b id="port">—</b></div>
+<section class="hero">
+<h1>COMMAND CENTER</h1>
+<p class="mut">IA • WEB • ROUTEROS • CÂMERAS • INTERNET • WHATSAPP • AUTO-OTIMIZAÇÃO</p>
+<div class="actions">
+<button class="primary" onclick="all()">⚡ VERIFICAR TUDO</button>
+<button onclick="turbo()">🚀 TESTE TURBO</button>
+<button onclick="research()">🌐 PESQUISAR</button>
+<button onclick="ask()">🧠 IA</button>
 </div>
-<button style="margin-top:10px" onclick="health()">REVISAR CONEXÃO PYTHON</button>
 </section>
-<section class="card"><h2>📋 Resultado</h2><pre id="out">Pronto para diagnóstico.</pre></section>
-<section class="card">
-<h2>📝 Configuração</h2>
-<textarea id="cfg" rows="7" placeholder="Cole aqui uma configuração MikroTik para análise segura..."></textarea>
-<button class="primary" style="margin-top:8px" onclick="analisarTexto()">ANALISAR TEXTO</button>
+
+<section class="grid">
+<div class="card"><div class="label">CPU</div><div id="cpu" class="metric">—</div><div class="bar"><div id="cpuBar" class="fill"></div></div></div>
+<div class="card"><div class="label">RAM</div><div id="ram" class="metric">—</div><div class="bar"><div id="ramBar" class="fill"></div></div></div>
+<div class="card"><div class="label">DISCO</div><div id="disk" class="metric">—</div><div class="bar"><div id="diskBar" class="fill"></div></div></div>
+<div class="card"><div class="label">INTERNET</div><div id="internet" class="metric good">—</div></div>
 </section>
+
+<div class="tabbar">
+<button onclick="showTab('aiBox')">🧠 IA</button>
+<button onclick="showTab('rscBox')">🛠️ MikroTik</button>
+<button onclick="showTab('camBox')">📷 Câmeras</button>
+<button onclick="showTab('waBox')">📱 WhatsApp</button>
+<button onclick="showTab('knowBox')">📖 Dicionário</button>
+</div>
+
+<section id="aiBox" class="cols">
+<div class="card"><h2>🧠 IA + Pesquisa Web</h2><textarea id="prompt" placeholder="Pergunte, pesquise ou peça uma análise..."></textarea><div class="actions"><button class="primary" onclick="ask()">Executar IA</button><button onclick="research()">Pesquisar na web</button></div><pre id="ai">Aguardando.</pre></div>
+<div class="card"><h2>📡 Rede</h2><pre id="network">Aguardando.</pre></div>
+</section>
+
+<section id="rscBox" class="card wide hidden">
+<h2>🛠️ RouterOS — VALIDAR → REVISAR → CORRIGIR</h2>
+<p class="mut">Cole o script e informe a versão. O JARVIS não executa mudanças automaticamente.</p>
+<input id="rosver" placeholder="Ex.: RouterOS 7.16" value="unknown">
+<textarea id="rsc" placeholder="/ip ..."></textarea>
+<div class="actions"><button onclick="validate()">Validar local</button><button class="primary" onclick="repair()">IA: revisar + corrigir</button></div>
+<pre id="rout">Nenhuma análise.</pre>
+</section>
+
+<section id="camBox" class="card wide hidden">
+<h2>📷 Assistente de câmeras</h2>
+<p class="mut">Perfis e checklist para Hikvision, Milesight e ONVIF/RTSP. A configuração real depende do modelo e firmware.</p>
+<div class="actions"><button onclick="camera('hikvision')">Hikvision</button><button onclick="camera('milesight')">Milesight</button><button onclick="camera('generic')">ONVIF/RTSP</button></div>
+<pre id="cam">Selecione um perfil.</pre>
+</section>
+
+<section id="waBox" class="card wide hidden">
+<h2>📱 WhatsApp oficial</h2>
+<p class="mut">O painel usa a API oficial quando as variáveis da Cloud API estão configuradas no ambiente. Não armazena sua senha do WhatsApp.</p>
+<input id="wato" placeholder="Número com DDI, ex.: 55...">
+<textarea id="wamsg" placeholder="Mensagem"></textarea>
+<div class="actions"><button class="primary" onclick="sendWA()">Enviar</button></div>
+<pre id="wa">WhatsApp não configurado ou aguardando envio.</pre>
+</section>
+
+<section id="knowBox" class="card wide hidden">
+<h2>📖 Dicionário Técnico</h2><pre id="know">Carregando...</pre>
+</section>
+
+<section class="card wide" style="margin-top:13px"><h2>📜 Memória / eventos</h2><pre id="events">Carregando...</pre></section>
 </main>
 <script>
-const out=document.getElementById('out');
-async function api(path,opts={}){try{const r=await fetch(path,opts);const j=await r.json();out.textContent=JSON.stringify(j,null,2);return j}catch(e){out.textContent="Python Core indisponível: "+e.message}}
-async function health(){const j=await api('/api/health');if(j){document.getElementById('py').textContent=j.ok?'CONECTADO':'ERRO';document.getElementById('py').className=j.ok?'ok':'bad';document.getElementById('port').textContent=j.port||'—'}}
-function analisar(){api('/api/diagnostic')}
-function internet(){api('/api/internet')}
-function rede(){api('/api/network')}
-function sistemas(){api('/api/system')}
-function diagnostico(){api('/api/diagnostic')}
-function analisarTexto(){api('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({config:document.getElementById('cfg').value})})}
-health();
+const $=id=>document.getElementById(id);
+function showTab(id){document.querySelectorAll('.tabbar+section,.cols,#rscBox,#camBox,#waBox,#knowBox').forEach(x=>{if(x) x.classList.add('hidden')});$(id).classList.remove('hidden')}
+async function api(u,o){const r=await fetch(u,o);const t=await r.text();let d;try{d=JSON.parse(t)}catch(e){throw Error("Resposta não-JSON: "+t.slice(0,160))}if(!r.ok||d.ok===false)throw Error(d.error||("HTTP "+r.status));return d}
+function meter(id,bar,v){$(id).textContent=v+"%";$(bar).style.width=Math.min(100,Math.max(0,v))+"%"}
+async function sys(){try{const d=await api('/api/system');meter('cpu','cpuBar',d.cpu);meter('ram','ramBar',d.ram);meter('disk','diskBar',d.disk)}catch(e){}}
+async function internet(){try{const d=await api('/api/internet');$('internet').textContent=d.online?'ONLINE':'OFFLINE'}catch(e){$('internet').textContent='ERRO'}}
+async function network(){try{$('network').textContent=JSON.stringify(await api('/api/network'),null,2)}catch(e){$('network').textContent=e.message}}
+async function all(){await Promise.all([sys(),internet(),network(),events(),knowledge()])}
+async function turbo(){let t=performance.now();try{const r=await fetch('https://www.gstatic.com/generate_204',{cache:'no-store'});const ms=Math.round(performance.now()-t);alert('Internet: '+r.status+' | latência: '+ms+' ms\\nTeste local: conexão OK.')}catch(e){alert('Falha: '+e.message)}}
+async function ask(){showTab('aiBox');const text=$('prompt').value.trim();if(!text){$('ai').textContent='Digite uma pergunta.';return}$('ai').textContent='Processando…';try{const d=await api('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});$('ai').textContent=d.text||d.error}catch(e){$('ai').textContent=e.message}}
+async function research(){showTab('aiBox');const text=$('prompt').value.trim();if(!text)return;$('ai').textContent='Pesquisando…';try{const d=await api('/api/research',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});$('ai').textContent=d.text||d.error}catch(e){$('ai').textContent=e.message}}
+async function validate(){const script=$('rsc').value;try{$('rout').textContent=JSON.stringify(await api('/api/validate-script',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({script,routeros_version:$('rosver').value})}),null,2)}catch(e){$('rout').textContent=e.message}}
+async function repair(){const script=$('rsc').value; $('rout').textContent='Revisando com IA + fontes…';try{$('rout').textContent=JSON.stringify(await api('/api/repair-script',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({script,routeros_version:$('rosver').value})}),null,2)}catch(e){$('rout').textContent=e.message}}
+async function camera(brand){showTab('camBox');try{$('cam').textContent=JSON.stringify(await api('/api/camera/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:brand})}),null,2)}catch(e){$('cam').textContent=e.message}}
+async function sendWA(){try{const d=await api('/api/whatsapp/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:$('wato').value,text:$('wamsg').value})});$('wa').textContent=JSON.stringify(d,null,2)}catch(e){$('wa').textContent=e.message}}
+async function events(){try{const d=await api('/api/events');$('events').textContent=d.length?d.map(x=>x.ts+' | '+x.kind+'\\n'+x.data).join('\\n\\n'):'Nenhum evento.'}catch(e){}}
+async function knowledge(){try{$('know').textContent=JSON.stringify(await api('/api/knowledge'),null,2)}catch(e){}}
+const ws=new WebSocket((location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/ws');ws.onmessage=e=>{const d=JSON.parse(e.data);meter('cpu','cpuBar',d.cpu);meter('ram','ramBar',d.ram);meter('disk','diskBar',d.disk)};all();setInterval(sys,10000);
 </script>
 </body></html>
